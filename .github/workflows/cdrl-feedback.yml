@@ -12,6 +12,7 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,8 +29,11 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-            - name: Start PostgreSQL
-        run: docker compose up -d postgres
+      - name: Start PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker compose up -d postgres
 
       - name: Wait for PostgreSQL
         shell: bash
@@ -48,3 +52,8 @@ jobs:
           exit 1
 
       - name: Verify reproducibility contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          make setup
+          make verify
