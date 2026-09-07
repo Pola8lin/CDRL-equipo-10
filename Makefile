@@ -1,12 +1,11 @@
 .PHONY: setup verify run
 
 setup:
-	@mkdir -p artifacts evidence docs db/migrations db/seed src tests
-	@test -f .env.example
-	@echo "CDRL starter base preparada. Configura .env localmente cuando corresponda."
+	@python -c "from pathlib import Path; [Path(p).mkdir(parents=True, exist_ok=True) for p in ['artifacts','evidence','docs','db/migrations','db/seed','src','tests']]"
+	@python scripts/db_setup.py
 
 verify:
-	@bash scripts/verify_base.sh
+	@python -m pytest -q
 
 run:
 	@docker compose up
