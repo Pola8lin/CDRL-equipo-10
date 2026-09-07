@@ -28,12 +28,23 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Start PostgreSQL
+            - name: Start PostgreSQL
         run: docker compose up -d postgres
 
-      - name: Verify reproducibility contract
+      - name: Wait for PostgreSQL
         shell: bash
         run: |
           set -euo pipefail
-          make setup
-          make verify
+          for i in {1..30}; do
+            if docker compose exec -T postgres pg_isready -U cdrl_dev -d cdrl; then
+              echo "PostgreSQL está listo."
+              exit 0
+            fi
+            echo "Esperando a PostgreSQL..."
+            sleep 2
+          done
+          echo "PostgreSQL no estuvo listo a tiempo."
+          docker compose logs postgres
+          exit 1
+
+      - name: Verify reproducibility contract
