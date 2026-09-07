@@ -1,0 +1,37 @@
+{
+  "assignmentId": "m01-data-contract",
+  "contractVersion": "1.0.0",
+  "testCommand": "python -m pytest -q",
+  "summary": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "status": "passed"
+  },
+  "testCases": {
+    "normal": {
+      "value": 23.50,
+      "expected": "accepted",
+      "actual": "accepted",
+      "status": "passed"
+    },
+    "lower_boundary": {
+      "value": -50.00,
+      "expected": "accepted",
+      "actual": "accepted",
+      "status": "passed"
+    },
+    "upper_boundary": {
+      "value": 100.00,
+      "expected": "accepted",
+      "actual": "accepted",
+      "status": "passed"
+    },
+    "declared_failure": {
+      "value": 150.00,
+      "expected": "rejected",
+      "actual": "rejected",
+      "status": "passed"
+    }
+  }
+}
