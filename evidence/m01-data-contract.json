@@ -6,16 +6,108 @@
     "make verify",
     "make run"
   ],
+  "contract": {
+    "name": "CDRL M01 Telemetry Data Contract",
+    "version": "1.0.0",
+    "description": "Una lectura de telemetría es un dato generado por un dispositivo o sensor en un instante determinado, que registra una métrica y su valor.",
+    "entity": "telemetry_reading",
+    "fields": {
+      "device_id": {
+        "type": "string",
+        "required": true,
+        "description": "Identificador del sensor o dispositivo.",
+        "example": "sensor-001"
+      },
+      "timestamp": {
+        "type": "datetime",
+        "required": true,
+        "format": "ISO 8601",
+        "description": "Momento exacto en que se realizó la lectura.",
+        "example": "2026-09-06T10:30:00Z"
+      },
+      "metric": {
+        "type": "string",
+        "required": true,
+        "allowed_values": [
+          "temperature"
+        ],
+        "description": "Métrica registrada."
+      },
+      "value": {
+        "type": "decimal",
+        "required": true,
+        "minimum": -50.00,
+        "maximum": 100.00,
+        "inclusive": true,
+        "description": "Valor numérico de la temperatura registrada."
+      },
+      "unit": {
+        "type": "string",
+        "required": true,
+        "allowed_values": [
+          "°C"
+        ],
+        "description": "Unidad de medida de la temperatura."
+      }
+    },
+    "validation_rules": [
+      "Todos los campos son obligatorios.",
+      "device_id no puede estar vacío.",
+      "timestamp debe tener formato ISO 8601.",
+      "metric debe ser temperature.",
+      "unit debe ser °C.",
+      "value debe ser un número decimal entre -50.00 y 100.00, incluyendo ambos límites."
+    ]
+  },
+  "testCases": {
+    "normal": {
+      "device_id": "sensor-001",
+      "timestamp": "2026-09-06T10:30:00Z",
+      "metric": "temperature",
+      "value": 23.50,
+      "unit": "°C",
+      "expected": "accepted"
+    },
+    "lower_boundary": {
+      "device_id": "sensor-001",
+      "timestamp": "2026-09-06T10:31:00Z",
+      "metric": "temperature",
+      "value": -50.00,
+      "unit": "°C",
+      "expected": "accepted"
+    },
+    "upper_boundary": {
+      "device_id": "sensor-001",
+      "timestamp": "2026-09-06T10:32:00Z",
+      "metric": "temperature",
+      "value": 100.00,
+      "unit": "°C",
+      "expected": "accepted"
+    },
+    "declared_failure": {
+      "device_id": "sensor-001",
+      "timestamp": "2026-09-06T10:33:00Z",
+      "metric": "temperature",
+      "value": 150.00,
+      "unit": "°C",
+      "expected": "rejected",
+      "reason": "value is outside the allowed range of -50.00 to 100.00"
+    }
+  },
   "results": {
-    "starterBase": "pending_team_execution"
+    "starterBase": "pending_team_execution",
+    "contractStatus": "defined"
   },
   "assumptions": [
     "El equipo elegirá y documentará el lenguaje de la aplicación.",
     "AWS Academy Learner Lab se usará solo si el servicio está habilitado.",
-    "Los datos iniciales serán sintéticos."
+    "Los datos iniciales serán sintéticos.",
+    "M01 utilizará temperatura como métrica inicial de telemetría.",
+    "Los valores de temperatura se expresarán en grados Celsius."
   ],
   "limitations": [
     "La base inicial no es una implementación completa de M01.",
-    "La imagen local de DynamoDB debe fijarse y reportarse cuando el equipo la use."
+    "La imagen local de DynamoDB debe fijarse y reportarse cuando el equipo la use.",
+    "El contrato de M01 contempla inicialmente la métrica temperature."
   ]
 }
