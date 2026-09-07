@@ -1,4 +1,3 @@
-```python
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
@@ -116,5 +115,3 @@ DECLARED_FAILURE_CASE = {
     "value": 150.00,
     "unit": "°C",
 }
-```
-
