@@ -4,7 +4,7 @@ from uuid import uuid4
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.database import insert_telemetry
+from src.database import insert_telemetry, get_telemetry_by_device
 
 
 def make_reading(value):
@@ -45,20 +45,34 @@ def test_declared_failure_is_rejected():
 
     assert valid is False
     assert errors != []
-    
-
-
 def test_insert_empty_device_id():
     empty_reading = make_reading(25.00)
-    empty_reading["device_id"] = "   " 
-    
+    empty_reading["device_id"] = "   "
+
     valid, errors = insert_telemetry(empty_reading)
-    
+
     assert valid is False
     assert errors != []
+
 
 def test_insert_out_of_range_strict():
     valid, errors = insert_telemetry(make_reading(100.01))
-    
+
     assert valid is False
     assert errors != []
+
+
+def test_get_telemetry_by_device():
+    reading = make_reading(23.50)
+
+    valid, inserted = insert_telemetry(reading)
+
+    assert valid is True
+
+    results = get_telemetry_by_device(reading["device_id"])
+
+    assert len(results) == 1
+    assert results[0][1] == reading["device_id"]
+    assert results[0][3] == "temperature"
+    assert str(results[0][4]) == "23.50"
+    assert results[0][5] == "°C"

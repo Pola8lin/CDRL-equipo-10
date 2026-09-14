@@ -1,0 +1,69 @@
+{
+  "assignmentId": "m02-relational-model",
+  "version": "1.0.0",
+  "repository": "CDRL-equipo-10",
+  "database": {
+    "engine": "PostgreSQL",
+    "migration": "db/migrations/01_create_table.sql",
+    "seed": "db/seed/02_insert_data.sql",
+    "table": "telemetry_reading"
+  },
+  "integrity": {
+    "device_id": {
+      "required": true,
+      "rejects_empty_or_whitespace": true
+    },
+    "timestamp": {
+      "required": true,
+      "type": "TIMESTAMPTZ"
+    },
+    "metric": {
+      "allowed": [
+        "temperature"
+      ]
+    },
+    "value": {
+      "minimum": -50.00,
+      "maximum": 100.00
+    },
+    "unit": {
+      "allowed": [
+        "°C"
+      ]
+    }
+  },
+  "parameterized_queries": {
+    "insert": {
+      "function": "insert_telemetry",
+      "statement": "INSERT INTO telemetry_reading (device_id, timestamp, metric, value, unit) VALUES (%s, %s, %s, %s, %s)"
+    },
+    "select": {
+      "function": "get_telemetry_by_device",
+      "statement": "SELECT id, device_id, timestamp, metric, value, unit FROM telemetry_reading WHERE device_id = %s ORDER BY timestamp"
+    }
+  },
+  "tests": {
+    "command": "python -m pytest -q",
+    "total": 10,
+    "passed": 10,
+    "failed": 0,
+    "status": "passed"
+  },
+  "database_constraint_checks": {
+    "invalid_value_100_01": {
+      "expected": "rejected",
+      "constraint": "telemetry_reading_value_check",
+      "status": "passed"
+    },
+    "whitespace_device_id": {
+      "expected": "rejected",
+      "constraint": "telemetry_reading_device_id_check",
+      "status": "passed"
+    }
+  },
+  "commands": {
+    "setup": "make setup",
+    "verify": "make verify",
+    "run": "make run"
+  }
+}

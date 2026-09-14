@@ -1,0 +1,80 @@
+{
+  "assignmentId": "m02-relational-model",
+  "contractVersion": "1.0.0",
+  "testCommand": "python -m pytest -q",
+  "summary": {
+    "total": 10,
+    "passed": 10,
+    "failed": 0,
+    "status": "passed"
+  },
+  "testCases": {
+    "database_normal": {
+      "test": "test_insert_normal_case",
+      "expected": "accepted",
+      "actual": "accepted",
+      "status": "passed"
+    },
+    "database_lower_boundary": {
+      "test": "test_insert_lower_boundary",
+      "value": -50.00,
+      "expected": "accepted",
+      "actual": "accepted",
+      "status": "passed"
+    },
+    "database_upper_boundary": {
+      "test": "test_insert_upper_boundary",
+      "value": 100.00,
+      "expected": "accepted",
+      "actual": "accepted",
+      "status": "passed"
+    },
+    "declared_failure": {
+      "test": "test_declared_failure_is_rejected",
+      "value": 150.00,
+      "expected": "rejected",
+      "actual": "rejected",
+      "status": "passed"
+    },
+    "parameterized_select": {
+      "test": "test_get_telemetry_by_device",
+      "expected": "matching record returned",
+      "actual": "matching record returned",
+      "status": "passed"
+    },
+    "validator_normal": {
+      "test": "test_normal_case",
+      "expected": "accepted",
+      "actual": "accepted",
+      "status": "passed"
+    },
+    "validator_lower_boundary": {
+      "test": "test_lower_boundary",
+      "value": -50.00,
+      "expected": "accepted",
+      "actual": "accepted",
+      "status": "passed"
+    },
+    "validator_upper_boundary": {
+      "test": "test_upper_boundary",
+      "value": 100.00,
+      "expected": "accepted",
+      "actual": "accepted",
+      "status": "passed"
+    },
+    "validator_declared_failure": {
+      "test": "test_declared_failure",
+      "value": 150.00,
+      "expected": "rejected",
+      "actual": "rejected",
+      "status": "passed"
+    },
+    "validator_empty_device_id": {
+      "test": "test_empty_device_id",
+      "value": "",
+      "expected": "rejected",
+      "actual": "rejected",
+      "status": "passed"
+    }
+  }
+}
