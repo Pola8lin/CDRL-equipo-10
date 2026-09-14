@@ -45,3 +45,20 @@ def test_declared_failure_is_rejected():
 
     assert valid is False
     assert errors != []
+    
+
+
+def test_insert_empty_device_id():
+    empty_reading = make_reading(25.00)
+    empty_reading["device_id"] = "   " 
+    
+    valid, errors = insert_telemetry(empty_reading)
+    
+    assert valid is False
+    assert errors != []
+
+def test_insert_out_of_range_strict():
+    valid, errors = insert_telemetry(make_reading(100.01))
+    
+    assert valid is False
+    assert errors != []
