@@ -47,6 +47,10 @@ def run_permission_test(name, config, query, expected):
 
 
 def main():
+    print(" VALIDACIÓN DE ACCESOS Y PERMISOS")
+    print(" Autor Técnico: Ismael Hernández Jiménez")
+
+    print("\n 1. Pruebas de caso normal")
     run_permission_test(
         "Writer puede insertar",
         USERS["writer"],
@@ -58,6 +62,29 @@ def main():
         "PERMITIDO",
     )
 
+    print("\n 2. Dos casos límite")
+    run_permission_test(
+        "Writer inserta limite superior de temperatura (100.00)",
+        USERS["writer"],
+        """
+        INSERT INTO telemetry_reading
+        (device_id, timestamp, metric, value, unit)
+        VALUES ('limit-max', NOW(), 'temperature', 100.00, '°C')
+        """,
+        "PERMITIDO",
+    )
+    run_permission_test(
+        "Writer inserta limite inferior de temperatura (-50.00)",
+        USERS["writer"],
+        """
+        INSERT INTO telemetry_reading
+        (device_id, timestamp, metric, value, unit)
+        VALUES ('limit-min', NOW(), 'temperature', -50.00, '°C')
+        """,
+        "PERMITIDO",
+    )
+
+    print("\n 3. Pruebas negativas de permisos")
     run_permission_test(
         "Reader no puede insertar",
         USERS["reader"],
@@ -68,7 +95,6 @@ def main():
         """,
         "DENEGADO",
     )
-
     run_permission_test(
         "Reader no puede eliminar",
         USERS["reader"],
@@ -78,7 +104,6 @@ def main():
         """,
         "DENEGADO",
     )
-
     run_permission_test(
         "Writer no puede eliminar",
         USERS["writer"],
@@ -88,7 +113,6 @@ def main():
         """,
         "DENEGADO",
     )
-
     run_permission_test(
         "Operator no puede consultar tabla",
         USERS["operator"],
@@ -98,6 +122,15 @@ def main():
         "DENEGADO",
     )
 
+    print("\n 4. Fallo declarado")
+    run_permission_test(
+        "Operator puede ver roles del sistema interno",
+        USERS["operator"],
+        """
+        SELECT rolname FROM pg_roles LIMIT 1
+        """,
+        "PERMITIDO",
+    )
 
 if __name__ == "__main__":
     main()

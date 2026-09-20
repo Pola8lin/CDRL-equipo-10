@@ -58,26 +58,30 @@ configuradas mediante variables de entorno, fuera del repositorio.
 
 
 
-\## Validación
+\## Validación y Pruebas
+Autor técnico de validación: Ismael Hernández Jiménez
 
-Se ejecutaron cinco pruebas de permisos:
+Se ejecutaron pruebas automatizadas de seguridad cubriendo todos los escenarios requeridos:
 
+1. Pruebas de caso normal:
+- Writer puede insertar: PERMITIDO.
 
+2. Dos casos límite:
+- Writer inserta límite superior de temperatura (100.00): PERMITIDO.
+- Writer inserta límite inferior de temperatura (-50.00): PERMITIDO.
 
-\- Writer puede insertar: permitido.
+3. Pruebas negativas de permisos (Acceso denegado):
+- Reader no puede insertar: DENEGADO.
+- Reader no puede eliminar: DENEGADO.
+- Writer no puede eliminar: DENEGADO.
+- Operator no puede consultar la tabla: DENEGADO.
 
-\- Reader no puede insertar: denegado.
-
-\- Reader no puede eliminar: denegado.
-
-\- Writer no puede eliminar: denegado.
-
-\- Operator no puede consultar la tabla: denegado.
+4. Fallo Declarado y Resultados:
+Se documenta una vulnerabilidad menor conocida: el rol `cdrl_operator` cuenta con permisos de lectura sobre las tablas internas del sistema (ej. `pg_roles`). Al ser necesario para operaciones de mantenimiento, este acceso se mantiene "PERMITIDO" como un fallo declarado.
 
 
 
 Todas las pruebas obtuvieron el resultado esperado.
-
 
 
 \## Rotación de contraseñas
