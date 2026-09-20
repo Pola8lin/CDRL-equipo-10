@@ -1,7 +1,5 @@
 
 -- M03: Roles y mínimo privilegio
--- Los roles de permisos no tienen inicio de sesión.
--- Las credenciales se configurarán fuera de este archivo.
 
 DO $$
 BEGIN
@@ -31,25 +29,40 @@ BEGIN
 END
 $$;
 
--- Permisos sobre el esquema
+-- Permisos de esquema
 GRANT USAGE ON SCHEMA public
-TO cdrl_reader, cdrl_writer, cdrl_operator;
+TO cdrl_migrator, cdrl_reader, cdrl_writer, cdrl_operator;
 
--- Permisos de lectura
+-- Reader: solo lectura
 GRANT SELECT ON TABLE telemetry_reading
 TO cdrl_reader;
 
--- Permisos de escritura
-GRANT SELECT, INSERT, UPDATE ON TABLE telemetry_reading
+-- Writer: lectura e inserción/modificación
+GRANT SELECT, INSERT, UPDATE
+ON TABLE telemetry_reading
 TO cdrl_writer;
 
--- Permisos de secuencia para INSERT
-GRANT USAGE, SELECT ON SEQUENCE telemetry_reading_id_seq
+GRANT USAGE, SELECT
+ON SEQUENCE telemetry_reading_id_seq
 TO cdrl_writer;
 
--- Permisos de migración
+-- Migrator: control completo sobre la tabla y secuencia
 GRANT ALL PRIVILEGES ON TABLE telemetry_reading
 TO cdrl_migrator;
 
 GRANT ALL PRIVILEGES ON SEQUENCE telemetry_reading_id_seq
 TO cdrl_migrator;
+
+-- Operator: acceso únicamente a un resumen
+CREATE OR REPLACE VIEW public.telemetry_summary AS
+SELECT
+    metric,
+    COUNT(*) AS total_readings
+FROM public.telemetry_reading
+GROUP BY metric;
+
+REVOKE ALL ON TABLE public.telemetry_summary
+FROM PUBLIC;
+
+GRANT SELECT ON TABLE public.telemetry_summary
+TO cdrl_operator;
