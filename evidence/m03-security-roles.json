@@ -1,0 +1,38 @@
+{
+  "module": "M03",
+  "title": "Seguridad y mínimo privilegio",
+  "status": "passed",
+  "tests": [
+    {
+      "name": "Writer puede insertar",
+      "result": "PERMITIDO",
+      "status": "OK"
+    },
+    {
+      "name": "Reader no puede insertar",
+      "result": "DENEGADO",
+      "status": "OK"
+    },
+    {
+      "name": "Reader no puede eliminar",
+      "result": "DENEGADO",
+      "status": "OK"
+    },
+    {
+      "name": "Writer no puede eliminar",
+      "result": "DENEGADO",
+      "status": "OK"
+    },
+    {
+      "name": "Operator no puede consultar tabla",
+      "result": "DENEGADO",
+      "status": "OK"
+    }
+  ],
+  "security_controls": [
+    "Usuarios independientes",
+    "Roles separados por capacidad",
+    "Contraseñas configuradas fuera del repositorio",
+    "Pruebas de acceso permitido y denegado"
+  ]
+}
