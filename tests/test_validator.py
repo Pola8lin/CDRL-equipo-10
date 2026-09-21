@@ -39,3 +39,13 @@ def test_declared_failure():
 
     assert valid is False
     assert errors != []
+
+
+def test_empty_device_id():
+    reading = NORMAL_CASE.copy()
+    reading["device_id"] = ""
+
+    valid, errors = validate_telemetry(reading)
+
+    assert valid is False
+    assert "device_id cannot be empty" in errors

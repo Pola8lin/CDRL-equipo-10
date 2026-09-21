@@ -60,3 +60,21 @@ def insert_telemetry(reading):
             row = cur.fetchone()
 
     return True, row
+
+def get_telemetry_by_device(device_id):
+    """
+    Consulta las lecturas de telemetría de un dispositivo
+    usando una consulta parametrizada.
+    """
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT id, device_id, timestamp, metric, value, unit
+                FROM telemetry_reading
+                WHERE device_id = %s
+                ORDER BY timestamp
+                """,
+                (device_id,),
+            )
+            return cur.fetchall()
