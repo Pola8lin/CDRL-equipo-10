@@ -11,6 +11,6 @@ source .env
 set +a
 
 echo "Iniciando pruebas..."
-python -m pytest tests/ -v
+python.exe -m pytest tests/ -v
 
 echo "Pruebas finalizadas correctamente."
