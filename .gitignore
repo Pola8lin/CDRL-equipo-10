@@ -10,3 +10,5 @@ evidence/*-local.json
 db/data/
 docker-data/
 .DS_Store
+# Secretos y variables de entorno local
+.env

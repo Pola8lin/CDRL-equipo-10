@@ -1,0 +1,15 @@
+{
+    "assignmentId": "m03-roles-secrets",
+    "responsible": "Erick",
+    "secrets_management": {
+        "env_variables_configured": true,
+        "secrets_versioned_in_repo": false,
+        "gitignore_updated": true,
+        "rotation_policy_documented": true
+    },
+    "automation": {
+        "test_scripts_configured": true,
+        "script_path": "scripts/run_tests.sh"
+    },
+    "status": "ready_for_integration"
+}
