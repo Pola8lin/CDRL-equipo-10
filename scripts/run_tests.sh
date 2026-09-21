@@ -1,11 +1,16 @@
 #!/bin/bash
-# Script para cargar secretos de forma segura y ejecutar pruebas
+set -e
 
-echo "Cargando variables de entorno desde .env..."
-# Exporta las variables del .env ignorando los comentarios
-export $(grep -v '^#' .env | xargs)
+if [ ! -f .env ]; then
+    echo "Error: no existe el archivo .env"
+    exit 1
+fi
 
-echo "Variables cargadas. Iniciando pruebas de seguridad y acceso..."
-pytest tests/ -v
+set -a
+source .env
+set +a
 
-echo "Pruebas finalizadas."
+echo "Iniciando pruebas..."
+python -m pytest tests/ -v
+
+echo "Pruebas finalizadas correctamente."
