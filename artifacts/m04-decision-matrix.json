@@ -1,0 +1,241 @@
+{
+  "title": "M04 — Matriz de decisión NoSQL",
+  "objective": "Comparar diferentes modelos de almacenamiento NoSQL para determinar cuál se adapta mejor al manejo de eventos y telemetría del proyecto CDRL.",
+  "alternatives": [
+    {
+      "type": "Document Store",
+      "name": "Firebase Cloud Firestore",
+      "hypothesis": "Firestore puede almacenar y consultar los eventos de CDRL mediante device_id y timestamp de manera directa."
+    },
+    {
+      "type": "Graph Store",
+      "name": "Neo4j",
+      "hypothesis": "Neo4j puede proporcionar ventajas cuando las consultas requieren recorrer relaciones entre entidades, mientras que las consultas simples de dispositivo y tiempo no explotan completamente el modelo de grafos."
+    },
+    {
+      "type": "Wide-Column Store",
+      "name": "Apache Cassandra",
+      "hypothesis": "Las ventajas de Cassandra serán más evidentes conforme aumenten el volumen de eventos y la carga de escritura y consulta."
+    },
+    {
+      "type": "Object Store",
+      "name": "Amazon S3",
+      "hypothesis": "S3 será más adecuado para conservación histórica, respaldos y almacenamiento de archivos que para consultas operacionales frecuentes de telemetría."
+    }
+  ],
+  "data_model": {
+    "fields": [
+      {
+        "name": "device_id",
+        "description": "Identificador del dispositivo que generó el evento"
+      },
+      {
+        "name": "timestamp",
+        "description": "Fecha y hora en la que se produjo la lectura"
+      },
+      {
+        "name": "metric",
+        "description": "Tipo de métrica registrada"
+      },
+      {
+        "name": "value",
+        "description": "Valor numérico de la medición"
+      },
+      {
+        "name": "unit",
+        "description": "Unidad de medida"
+      }
+    ],
+    "example": {
+      "device_id": "sensor-001",
+      "timestamp": "2026-09-26T10:30:00Z",
+      "metric": "temperature",
+      "value": 25.4,
+      "unit": "°C"
+    },
+    "main_query_pattern": "Obtener los eventos de un dispositivo dentro de un rango de tiempo."
+  },
+  "criteria": [
+    {
+      "name": "Consultas",
+      "weight": 25,
+      "justification": "El sistema necesita consultar eventos por dispositivo y tiempo."
+    },
+    {
+      "name": "Escalabilidad",
+      "weight": 25,
+      "justification": "El número de eventos puede aumentar conforme se incorporen más dispositivos."
+    },
+    {
+      "name": "Consistencia",
+      "weight": 20,
+      "justification": "Los eventos almacenados deben conservar sus valores correctamente."
+    },
+    {
+      "name": "Costo y operación",
+      "weight": 15,
+      "justification": "Se debe considerar el esfuerzo necesario para mantener la solución."
+    },
+    {
+      "name": "Tolerancia a fallos",
+      "weight": 15,
+      "justification": "La solución debe contemplar fallos de componentes o infraestructura."
+    }
+  ],
+  "scale": {
+    "1": "Muy desfavorable",
+    "2": "Desfavorable",
+    "3": "Aceptable",
+    "4": "Favorable",
+    "5": "Muy favorable"
+  },
+  "formula": "Puntuación ponderada = (Puntuación / 5) × Peso",
+  "matrix": [
+    {
+      "alternative": "Firebase Cloud Firestore",
+      "scores": {
+        "Consultas": 5,
+        "Escalabilidad": 4,
+        "Consistencia": 5,
+        "Costo y operación": 4,
+        "Tolerancia a fallos": 4
+      },
+      "total": 89
+    },
+    {
+      "alternative": "Neo4j",
+      "scores": {
+        "Consultas": 3,
+        "Escalabilidad": 4,
+        "Consistencia": 5,
+        "Costo y operación": 3,
+        "Tolerancia a fallos": 4
+      },
+      "total": 76
+    },
+    {
+      "alternative": "Apache Cassandra",
+      "scores": {
+        "Consultas": 5,
+        "Escalabilidad": 5,
+        "Consistencia": 3,
+        "Costo y operación": 3,
+        "Tolerancia a fallos": 5
+      },
+      "total": 86
+    },
+    {
+      "alternative": "Amazon S3",
+      "scores": {
+        "Consultas": 2,
+        "Escalabilidad": 5,
+        "Consistencia": 5,
+        "Costo y operación": 5,
+        "Tolerancia a fallos": 5
+      },
+      "total": 85
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "H1",
+      "criterion": "Consultas",
+      "hypothesis": "Las alternativas evaluadas pueden almacenar los eventos de CDRL, pero su capacidad para realizar consultas operacionales por dispositivo y rango de tiempo será diferente según el modelo de almacenamiento.",
+      "test": [
+        "device_id = sensor-001",
+        "device_id + rango de timestamp",
+        "device_id + metric + timestamp"
+      ],
+      "confirmation": "Las alternativas permiten realizar las consultas requeridas y las diferencias observadas corresponden a las características documentadas de cada modelo.",
+      "rejection": "Una alternativa no puede realizar correctamente una consulta requerida o necesita una transformación incompatible con el escenario evaluado."
+    },
+    {
+      "id": "H2",
+      "criterion": "Escalabilidad",
+      "hypothesis": "Las alternativas distribuidas o administradas podrán mantener las operaciones de almacenamiento y consulta conforme aumente el volumen de eventos sintéticos de CDRL, aunque su comportamiento y esfuerzo operativo serán diferentes.",
+      "test_volumes": [
+        1000,
+        10000,
+        100000,
+        1000000
+      ],
+      "measurements": [
+        "Tiempo de escritura",
+        "Tiempo de consulta",
+        "Errores",
+        "Recursos utilizados",
+        "Comportamiento al incrementar el volumen"
+      ],
+      "confirmation": "Las operaciones continúan funcionando conforme aumenta el volumen y el comportamiento observado coincide con las características esperadas de cada alternativa.",
+      "rejection": "Una alternativa deja de soportar las operaciones necesarias o presenta un crecimiento de recursos incompatible con el escenario."
+    },
+    {
+      "id": "H3",
+      "criterion": "Consistencia",
+      "hypothesis": "Las alternativas evaluadas proporcionarán mecanismos suficientes para mantener la integridad de los eventos de CDRL, aunque las garantías y mecanismos de consistencia serán diferentes entre los modelos.",
+      "test": "INSERT → READ → UPDATE → READ",
+      "fields_checked": [
+        "device_id",
+        "timestamp",
+        "metric",
+        "value",
+        "unit"
+      ],
+      "confirmation": "Las lecturas corresponden con los valores escritos y el comportamiento observado respeta las garantías documentadas.",
+      "rejection": "Los resultados contradicen las garantías de consistencia configuradas o documentadas."
+    },
+    {
+      "id": "H4",
+      "criterion": "Costo y operación",
+      "hypothesis": "Las soluciones administradas requerirán menor esfuerzo de operación directa que las soluciones que requieren administrar infraestructura propia, aunque el costo económico dependerá del volumen y patrón de uso.",
+      "tasks": [
+        "Instalación",
+        "Configuración",
+        "Actualizaciones",
+        "Escalamiento",
+        "Monitoreo",
+        "Recuperación ante fallos",
+        "Administración de infraestructura",
+        "Modelo general de costos"
+      ],
+      "confirmation": "Las soluciones administradas requieren menos tareas de infraestructura directa.",
+      "rejection": "Una alternativa administrada requiere prácticamente el mismo nivel de administración directa que una solución autogestionada en el escenario utilizado."
+    },
+    {
+      "id": "H5",
+      "criterion": "Tolerancia a fallos",
+      "hypothesis": "Las arquitecturas que utilizan redundancia y replicación podrán mantener los datos disponibles ante determinados fallos de infraestructura, dependiendo de su configuración.",
+      "test": [
+        "Disponibilidad de lectura",
+        "Disponibilidad de escritura",
+        "Integridad de los datos",
+        "Recuperación después del fallo"
+      ],
+      "confirmation": "La operación continúa o se recupera de acuerdo con la configuración y garantías documentadas.",
+      "rejection": "El fallo provoca pérdida de datos o indisponibilidad contraria a las garantías configuradas."
+    }
+  ],
+  "discarded_alternative": {
+    "name": "PostgreSQL como única solución",
+    "reason": "PostgreSQL se considera una alternativa válida para el escenario actual y no se descarta por falta de capacidad. Se considera descartada dentro de esta decisión porque el objetivo de M04 es evaluar modelos NoSQL para complementar o atender necesidades futuras relacionadas con grandes volúmenes de eventos.",
+    "hypothesis": "PostgreSQL como única solución puede continuar atendiendo el volumen actual de CDRL, pero ante un crecimiento considerable del volumen de telemetría podría requerir estrategias adicionales de particionamiento, indexación, retención, archivado, replicación o escalamiento."
+  },
+  "expected_evidence": [
+    "Fixtures sintéticos de eventos CDRL",
+    "Consultas por device_id",
+    "Consultas por rango de timestamp",
+    "Pruebas de incremento de volumen",
+    "Pruebas de lectura y escritura",
+    "Evaluación de mecanismos de consistencia",
+    "Comparación de tareas de operación",
+    "Pruebas controladas de fallos cuando la arquitectura utilizada lo permita"
+  ],
+  "evidence_file": "evidence/m04-nosql-decision.json",
+  "documentation_file": "docs/m04-decision-matrix.md",
+  "references": [
+    "Firebase Documentation — Cloud Firestore",
+    "Neo4j Documentation — Graph Database y Cypher",
+    "Apache Cassandra Documentation",
+    "Amazon Web Services Documentation — Amazon S3"
+  ]
+}
