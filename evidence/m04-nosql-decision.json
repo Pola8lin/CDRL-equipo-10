@@ -1,0 +1,116 @@
+{
+  "milestone": "M04",
+  "title": "Decisión arquitectónica NoSQL",
+  "objective": "Comparar modelos de almacenamiento NoSQL para los eventos y la telemetría del proyecto CDRL mediante una matriz de decisión ponderada.",
+  "artifact": "artifacts/m04-decision-matrix.json",
+  "documentation": "docs/m04-decision-matrix.md",
+  "test_file": "tests/test_m04_decision.py",
+  "alternatives": [
+    "Firebase Cloud Firestore",
+    "Neo4j",
+    "Apache Cassandra",
+    "Amazon S3"
+  ],
+  "criteria": {
+    "Consultas": 25,
+    "Escalabilidad": 25,
+    "Consistencia": 20,
+    "Costo y operación": 15,
+    "Tolerancia a fallos": 15
+  },
+  "scale": {
+    "minimum": 1,
+    "maximum": 5
+  },
+  "test_cases": [
+    {
+      "id": "TC-M04-01",
+      "type": "normal",
+      "description": "Verificar que la matriz contenga cuatro alternativas, cinco criterios y que los totales declarados coincidan con el cálculo ponderado.",
+      "expected": "La estructura y los totales de la matriz son válidos.",
+      "result": "passed"
+    },
+    {
+      "id": "TC-M04-02",
+      "type": "boundary",
+      "description": "Verificar que el puntaje mínimo permitido sea 1.",
+      "expected": "El puntaje 1 es aceptado.",
+      "result": "passed"
+    },
+    {
+      "id": "TC-M04-03",
+      "type": "boundary",
+      "description": "Verificar que el puntaje máximo permitido sea 5.",
+      "expected": "El puntaje 5 es aceptado.",
+      "result": "passed"
+    },
+    {
+      "id": "TC-M04-04",
+      "type": "declared_failure",
+      "description": "Verificar que un puntaje 6, fuera de la escala permitida, sea rechazado.",
+      "expected": "El puntaje 6 es identificado como inválido.",
+      "result": "passed"
+    }
+  ],
+  "matrix_results": [
+    {
+      "alternative": "Firebase Cloud Firestore",
+      "scores": {
+        "Consultas": 5,
+        "Escalabilidad": 4,
+        "Consistencia": 5,
+        "Costo y operación": 4,
+        "Tolerancia a fallos": 4
+      },
+      "total": 89
+    },
+    {
+      "alternative": "Neo4j",
+      "scores": {
+        "Consultas": 3,
+        "Escalabilidad": 4,
+        "Consistencia": 5,
+        "Costo y operación": 3,
+        "Tolerancia a fallos": 4
+      },
+      "total": 76
+    },
+    {
+      "alternative": "Apache Cassandra",
+      "scores": {
+        "Consultas": 5,
+        "Escalabilidad": 5,
+        "Consistencia": 3,
+        "Costo y operación": 3,
+        "Tolerancia a fallos": 5
+      },
+      "total": 86
+    },
+    {
+      "alternative": "Amazon S3",
+      "scores": {
+        "Consultas": 2,
+        "Escalabilidad": 5,
+        "Consistencia": 5,
+        "Costo y operación": 5,
+        "Tolerancia a fallos": 5
+      },
+      "total": 85
+    }
+  ],
+  "test_execution": {
+    "command": "python -m pytest -q",
+    "result": "16 passed in 0.33s",
+    "status": "passed"
+  },
+  "evidence_scope": "Las pruebas automatizadas validan la estructura de la matriz, los pesos, la escala de puntuación, el cálculo de los totales y los casos límite definidos. No representan benchmarks de rendimiento ni pruebas de infraestructura real sobre Firestore, Neo4j, Cassandra o S3.",
+  "declared_failure": {
+    "input": "score = 6",
+    "valid_range": "1..5",
+    "expected_behavior": "reject"
+  },
+  "discarded_alternative": {
+    "name": "PostgreSQL como única solución",
+    "reason": "Se descarta únicamente como alternativa única dentro de esta exploración NoSQL, considerando que un crecimiento importante de eventos podría requerir estrategias adicionales de particionamiento, indexación, retención, archivado o escalamiento."
+  }
+}
