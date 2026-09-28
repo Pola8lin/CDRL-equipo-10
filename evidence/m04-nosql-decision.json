@@ -1,0 +1,16 @@
+{
+    "assignmentId": "m04-nosql-decision",
+    "responsible": "Erick",
+    "testing": {
+        "fixtures_created": true,
+        "normal_cases": 1,
+        "edge_cases": 2,
+        "declared_failures": 1
+    },
+    "security_check": {
+        "no_hardcoded_secrets": true,
+        "no_personal_data": true,
+        "no_connection_strings": true
+    },
+    "status": "ready"
+}
