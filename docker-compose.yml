@@ -23,6 +23,15 @@ services:
     volumes:
       - dynamodb_data:/home/dynamodblocal/data
 
+  cdrl-app:
+    image: python:3.10-slim
+    working_dir: /app
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    command: tail -f /dev/null
+
 volumes:
   postgres_data:
   dynamodb_data:
