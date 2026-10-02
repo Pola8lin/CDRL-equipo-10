@@ -1,0 +1,42 @@
+[
+  {
+    "_description": "Caso normal",
+    "device_id": "sensor-001",
+    "timestamp": "2026-10-01T10:30:00Z",
+    "metric": "temperature",
+    "value": 23.50,
+    "unit": "°C"
+  },
+  {
+    "_description": "Valor límite inferior",
+    "device_id": "sensor-001",
+    "timestamp": "2026-10-01T10:31:00Z",
+    "metric": "temperature",
+    "value": -50.00,
+    "unit": "°C"
+  },
+  {
+    "_description": "Valor límite superior",
+    "device_id": "sensor-001",
+    "timestamp": "2026-10-01T10:32:00Z",
+    "metric": "temperature",
+    "value": 100.00,
+    "unit": "°C"
+  },
+  {
+    "_description": "Documento inválido (Fallo declarado por valor excesivo)",
+    "device_id": "sensor-001",
+    "timestamp": "2026-10-01T10:33:00Z",
+    "metric": "temperature",
+    "value": 150.00,
+    "unit": "°C"
+  },
+  {
+    "_description": "Documento inválido (Estructura incorrecta y datos vacíos)",
+    "device_id": "",
+    "timestamp": "fecha-invalida",
+    "metric": "humidity",
+    "value": 50,
+    "unit": "%"
+  }
+]
