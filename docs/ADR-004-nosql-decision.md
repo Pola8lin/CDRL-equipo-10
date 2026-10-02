@@ -43,3 +43,16 @@ Aunque PostgreSQL es capaz de manejar el volumen actual (y se mantendrá para la
  [API / Ingesta] ─── (Datos Relacionales/Seguridad) ───> [PostgreSQL]
        │
        └─── (Eventos masivos de telemetría) ───────────> [Firebase Cloud Firestore]
+
+## Estrategia de Índices y Rendimiento (Hito M05)
+
+Para garantizar que la base de datos documental (Firestore) escale correctamente y soporte las consultas principales, se han definido y verificado los siguientes índices:
+
+1. **Índice Simple: `idx_device_id` (device_id: ASC)**
+   * **Justificación:** Relacionado con la "Consulta normal" de telemetría. Evita escaneos secuenciales costosos al buscar el estado de un sensor específico, reduciendo la latencia de O(N) a O(log N).
+
+2. **Índice Compuesto: `idx_device_timestamp` (device_id: ASC, timestamp: DESC)**
+   * **Justificación:** Optimiza las consultas de series temporales. Permite recuperar el historial reciente de un dispositivo ya ordenado, lo cual es crítico en Firestore para minimizar los costos de operaciones de lectura.
+
+### Manejo de Idempotencia y Duplicados
+Se comprobó la estabilidad del almacén frente a operaciones repetidas. Las escrituras utilizan métodos idempotentes (como actualizaciones con `upsert` o control estricto del ID del documento). Si un mensaje de red se retransmite o una operación se ejecuta dos veces, el estado final de la base de datos permanece consistente y no se generan registros duplicados fantasma.
