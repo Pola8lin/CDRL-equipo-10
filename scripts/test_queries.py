@@ -1,58 +1,44 @@
-import os
-import pymongo
-from pymongo.errors import DuplicateKeyError
-from dotenv import load_dotenv
+import firebase_admin
+from firebase_admin import credentials, firestore
 
-# Cargar variables de entorno de forma segura
-load_dotenv()
+# Inicializa Firebase (asume que la variable GOOGLE_APPLICATION_CREDENTIALS está configurada)
+if not firebase_admin._apps:
+    cred = credentials.ApplicationDefault()
+    firebase_admin.initialize_app(cred)
 
-def get_database():
-    client = pymongo.MongoClient(
-        host=os.getenv("DB_HOST", "localhost"),
-        port=int(os.getenv("DB_PORT", 27017)),
-        username=os.getenv("DB_USER", "admin"),
-        password=os.getenv("DB_PASSWORD", "password")
-    )
-    return client[os.getenv("DB_NAME", "cdrl_document_store")]
+db = firestore.client()
+coleccion = db.collection("telemetry_events")
 
 def run_tests():
-    db = get_database()
-    coleccion = db["telemetry"]
-    
-    # Preparación: Limpiamos datos de prueba anteriores
-    coleccion.delete_many({"_id": {"$in": ["test_doc_1", "test_doc_2"]}})
+    print("--- PREPARACIÓN ---")
+    doc_ref_1 = coleccion.document("test_doc_1")
+    doc_ref_2 = coleccion.document("test_doc_2")
+    # Limpiamos antes de la prueba
+    doc_ref_1.delete()
+    doc_ref_2.delete()
 
     print("--- 1. CONSULTA NORMAL ---")
-    coleccion.insert_one({"_id": "test_doc_1", "device_id": "sensor-alpha", "temp": 25.0})
-    resultado_normal = coleccion.find_one({"device_id": "sensor-alpha"})
-    print(f"Éxito. Documento encontrado: {resultado_normal}")
+    doc_ref_1.set({"device_id": "sensor-alpha", "temp": 25.0, "timestamp": "2026-10-02T10:00:00Z"})
+    resultados = list(coleccion.where("device_id", "==", "sensor-alpha").stream())
+    print(f"Éxito. Documentos encontrados: {len(resultados)}")
 
     print("\n--- 2. AUSENCIA DE DOCUMENTO ---")
-    resultado_ausente = coleccion.find_one({"device_id": "sensor-fantasma"})
-    assert resultado_ausente is None
-    print("Éxito. El sistema maneja correctamente la búsqueda vacía (retorna None).")
+    resultados_vacios = list(coleccion.where("device_id", "==", "sensor-fantasma").stream())
+    assert len(resultados_vacios) == 0
+    print("Éxito. La consulta para un sensor inexistente retorna una lista vacía.")
 
-    print("\n--- 3. DUPLICADO ---")
-    try:
-        # Intentamos insertar el mismo registro exacto (mismo _id)
-        coleccion.insert_one({"_id": "test_doc_1", "device_id": "sensor-alpha", "temp": 99.9})
-        print("Error: El sistema permitió un duplicado.")
-    except DuplicateKeyError:
-        print("Éxito. El motor rechazó el documento duplicado protegiendo la integridad.")
-
-    print("\n--- 4. REPETICIÓN IDEMPOTENTE ---")
-    # Para hacer una operación segura de repetición, usamos update_one con upsert=True
-    filtro = {"_id": "test_doc_2"}
-    cambio = {"$set": {"device_id": "sensor-beta", "temp": 30.0}}
+    print("\n--- 3. DUPLICADOS E IDEMPOTENCIA ---")
+    # En Firestore, .set() sobrescribe si el ID ya existe, haciéndolo idempotente por naturaleza.
+    payload = {"device_id": "sensor-beta", "temp": 30.0, "timestamp": "2026-10-02T10:05:00Z"}
     
-    # Primera ejecución (crea el documento)
-    res1 = coleccion.update_one(filtro, cambio, upsert=True)
-    print(f"Ejecución 1 (Modificados: {res1.modified_count}, Insertados: {1 if res1.upserted_id else 0})")
+    # Ejecutamos la inserción dos veces
+    doc_ref_2.set(payload)
+    doc_ref_2.set(payload)
     
-    # Segunda ejecución idéntica (no hace nada ni rompe el sistema)
-    res2 = coleccion.update_one(filtro, cambio, upsert=True)
-    print(f"Ejecución 2 (Modificados: {res2.modified_count}, Insertados: {1 if res2.upserted_id else 0})")
-    print("Éxito. La operación es idempotente: ejecutarla varias veces deja el mismo estado final.")
+    # Verificamos que no se crearon documentos duplicados (debe haber solo 1)
+    res_idempotencia = list(coleccion.where("device_id", "==", "sensor-beta").stream())
+    assert len(res_idempotencia) == 1
+    print(f"Éxito. Operación idempotente confirmada. Registros totales creados: {len(res_idempotencia)}")
 
 if __name__ == "__main__":
     run_tests()
