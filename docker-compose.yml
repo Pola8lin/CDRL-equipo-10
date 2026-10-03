@@ -29,7 +29,8 @@ services:
     volumes:
       - .:/app
     env_file:
-      - .env
+      - path: .env
+        required: false
     command: tail -f /dev/null
 
 volumes:
