@@ -1,0 +1,107 @@
+{
+  "milestone": "M05",
+  "title": "Pruebas automatizadas de almacén documental e índices",
+  "objective": "Validar automáticamente el almacenamiento documental de eventos de telemetría, sus operaciones CRUD, casos límite, ausencia, idempotencia y configuración del índice compuesto de Firestore.",
+  "test_file": "tests/test_m05_document_store.py",
+  "index_file": "firestore.indexes.json",
+  "test_execution": {
+    "command": "python -m pytest -q tests/test_m05_document_store.py",
+    "result": "11 passed in 0.48s",
+    "status": "passed"
+  },
+  "test_cases": [
+    {
+      "id": "TC-M05-01",
+      "type": "normal",
+      "description": "Validar un documento de telemetría con temperatura normal.",
+      "expected": "El documento es válido.",
+      "result": "passed"
+    },
+    {
+      "id": "TC-M05-02",
+      "type": "boundary",
+      "description": "Validar el límite inferior de temperatura (-50.00 °C).",
+      "expected": "El valor es aceptado.",
+      "result": "passed"
+    },
+    {
+      "id": "TC-M05-03",
+      "type": "boundary",
+      "description": "Validar el límite superior de temperatura (100.00 °C).",
+      "expected": "El valor es aceptado.",
+      "result": "passed"
+    },
+    {
+      "id": "TC-M05-04",
+      "type": "declared_failure",
+      "description": "Validar una temperatura fuera del rango permitido (150.00 °C).",
+      "expected": "El documento es rechazado.",
+      "result": "passed"
+    },
+    {
+      "id": "TC-M05-05",
+      "type": "crud",
+      "description": "Crear un documento en el almacén documental.",
+      "expected": "Se devuelve el identificador y se ejecuta set().",
+      "result": "passed"
+    },
+    {
+      "id": "TC-M05-06",
+      "type": "crud",
+      "description": "Consultar un documento existente.",
+      "expected": "Se devuelve el contenido del documento.",
+      "result": "passed"
+    },
+    {
+      "id": "TC-M05-07",
+      "type": "absence",
+      "description": "Consultar un documento inexistente.",
+      "expected": "La consulta devuelve None.",
+      "result": "passed"
+    },
+    {
+      "id": "TC-M05-08",
+      "type": "crud",
+      "description": "Actualizar un documento existente.",
+      "expected": "Se ejecuta update() y la operación retorna True.",
+      "result": "passed"
+    },
+    {
+      "id": "TC-M05-09",
+      "type": "crud",
+      "description": "Eliminar un documento.",
+      "expected": "Se ejecuta delete() y la operación retorna True.",
+      "result": "passed"
+    },
+    {
+      "id": "TC-M05-10",
+      "type": "idempotence",
+      "description": "Crear dos veces un documento con el mismo identificador.",
+      "expected": "El mismo identificador se reutiliza y la segunda escritura sobrescribe mediante upsert.",
+      "result": "passed"
+    },
+    {
+      "id": "TC-M05-11",
+      "type": "index",
+      "description": "Validar la configuración del índice compuesto de telemetry_events.",
+      "expected": "Existe device_id ASCENDING y timestamp DESCENDING.",
+      "result": "passed"
+    }
+  ],
+  "index_validation": {
+    "collectionGroup": "telemetry_events",
+    "queryScope": "COLLECTION",
+    "fields": [
+      {
+        "fieldPath": "device_id",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "timestamp",
+        "order": "DESCENDING"
+      }
+    ],
+    "status": "passed"
+  },
+  "evidence_scope": "Las pruebas del DocumentStore utilizan mocks para validar el comportamiento de las operaciones sin requerir credenciales reales de Firestore. La configuración del índice se valida directamente desde firestore.indexes.json."
+}
