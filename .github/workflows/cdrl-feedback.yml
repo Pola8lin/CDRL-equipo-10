@@ -55,5 +55,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          cp .env.example .env
           make setup
           make verify
