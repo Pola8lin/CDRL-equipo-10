@@ -52,6 +52,16 @@ GRANT SELECT, INSERT, UPDATE
 ON TABLE telemetry_reading
 TO cdrl_writer;
 
+-- Writer: lectura e inserción/modificación
+GRANT SELECT, INSERT, UPDATE
+ON TABLE telemetry_reading
+TO cdrl_writer;
+
+-- Permitir al writer utilizar la secuencia que genera los ID
+GRANT USAGE, SELECT
+ON SEQUENCE public.telemetry_reading_id_seq
+TO cdrl_writer;
+
 -- Migrator: control completo sobre la tabla y secuencia
 GRANT ALL PRIVILEGES ON TABLE telemetry_reading
 TO cdrl_migrator;
