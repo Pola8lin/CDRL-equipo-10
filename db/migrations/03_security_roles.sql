@@ -31,19 +31,25 @@ $$;
 
 -- Permisos de esquema
 GRANT USAGE ON SCHEMA public
-TO cdrl_migrator, cdrl_reader, cdrl_writer, cdrl_operator;
+TO cdrl_reader, cdrl_writer, cdrl_operator;
+
+GRANT USAGE, CREATE ON SCHEMA public
+TO cdrl_migrator;
+
+-- El migrador será propietario de la tabla y la secuencia
+ALTER TABLE public.telemetry_reading
+OWNER TO cdrl_migrator;
+
+ALTER SEQUENCE public.telemetry_reading_id_seq
+OWNER TO cdrl_migrator;
 
 -- Reader: solo lectura
-GRANT SELECT ON TABLE telemetry_reading
+GRANT SELECT ON TABLE public.telemetry_reading
 TO cdrl_reader;
 
 -- Writer: lectura e inserción/modificación
 GRANT SELECT, INSERT, UPDATE
 ON TABLE telemetry_reading
-TO cdrl_writer;
-
-GRANT USAGE, SELECT
-ON SEQUENCE telemetry_reading_id_seq
 TO cdrl_writer;
 
 -- Migrator: control completo sobre la tabla y secuencia

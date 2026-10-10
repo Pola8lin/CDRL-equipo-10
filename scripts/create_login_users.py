@@ -1,10 +1,14 @@
 
 import os
+from pathlib import Path
 
 import psycopg
 
 from psycopg import sql
+from dotenv import load_dotenv
 
+ROOT = Path(__file__).resolve().parents[1]
+load_dotenv(ROOT / ".env")
 
 def get_connection():
     return psycopg.connect(

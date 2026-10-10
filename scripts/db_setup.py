@@ -4,6 +4,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from dotenv import load_dotenv
+load_dotenv(ROOT / ".env")
+
 from src.database import get_connection
 
 
