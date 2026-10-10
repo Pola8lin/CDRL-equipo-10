@@ -1,0 +1,18 @@
+[
+  {
+    "_description": "Documento antiguo válido: lectura normal",
+    "device_id": "sensor-m06-001",
+    "timestamp": "2026-10-01T10:30:00Z",
+    "metric": "temperature",
+    "value": 23.5,
+    "unit": "°C"
+  },
+  {
+    "_description": "Documento antiguo válido: límite inferior",
+    "device_id": "sensor-m06-002",
+    "timestamp": "2026-10-01T10:31:00Z",
+    "metric": "temperature",
+    "value": -50.0,
+    "unit": "°C"
+  }
+]
