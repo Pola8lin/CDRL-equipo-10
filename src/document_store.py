@@ -1,66 +1,104 @@
 import os
+
 from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, firestore
+from google.cloud.firestore_v1.base_query import FieldFilter
 
 from src.validator import validate_telemetry
 
-# Cargar las variables de entorno para no dejar rutas fijas en el código
+# Carga las variables de entorno del proyecto.
 load_dotenv()
+
 
 class DocumentStore:
     def __init__(self):
-        """Inicializa la conexión a Firestore."""
-        # Validar que la app no esté ya iniciada para evitar errores de Firebase
+        """Inicializa la conexi?n a Firestore."""
         if not firebase_admin._apps:
-            cred_path = os.getenv('FIREBASE_CREDENTIALS_PATH')
-            
-            # Si hay una ruta configurada en el .env, usa ese archivo JSON
-            if cred_path and os.path.exists(cred_path):
+            cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH")
+
+            if cred_path and os.path.isfile(cred_path):
                 cred = credentials.Certificate(cred_path)
                 firebase_admin.initialize_app(cred)
             else:
-                # En la nube usa las credenciales automáticas del servidor
+                # Usa las credenciales predeterminadas del entorno.
                 firebase_admin.initialize_app()
-        
-        # Conexión principal a la base de datos y la colección
+
         self.db = firestore.client()
-        self.collection_name = 'telemetry_events'
+        self.collection_name = "telemetry_events"
 
     def create_document(self, doc_id, data):
-        """Crea un documento o lo sobreescribe si ya existe."""
-        # Asegurar que la información cumpla con las reglas antes de escribir
-        es_valido, errores = validate_telemetry(data)
-        if not es_valido:
-            raise ValueError(f"No se puede guardar. Datos inválidos: {', '.join(errores)}")
+        """Valida y guarda un documento de telemetr?a."""
+        valid, errors = validate_telemetry(data)
+        if not valid:
+            raise ValueError(
+                "No se puede guardar la lectura: " + "; ".join(errors)
+            )
 
-        doc_ref = self.db.collection(self.collection_name).document(doc_id)
+        doc_ref = (
+            self.db.collection(self.collection_name)
+            .document(doc_id)
+        )
         doc_ref.set(data)
         return doc_id
 
     def get_document(self, doc_id):
-        """Obtiene un documento usando su ID."""
-        doc_ref = self.db.collection(self.collection_name).document(doc_id)
+        """Obtiene un documento por su ID."""
+        doc_ref = (
+            self.db.collection(self.collection_name)
+            .document(doc_id)
+        )
         doc = doc_ref.get()
-        
-        # Si el documento existe, lo regresamos como diccionario
+
         if doc.exists:
             return doc.to_dict()
+
         return None
 
-    def update_document(self, doc_id, data):
-        """Actualiza campos específicos de un registro."""
-        # También pasamos los datos por el validador en las actualizaciones
-        es_valido, errores = validate_telemetry(data)
-        if not es_valido:
-            raise ValueError(f"No se puede actualizar. Datos inválidos: {', '.join(errores)}")
+    def get_documents_by_device(self, device_id):
+        """Obtiene las lecturas de un dispositivo, de m?s reciente a m?s antigua."""
+        if not isinstance(device_id, str) or not device_id.strip():
+            raise ValueError("device_id debe ser una cadena no vac?a.")
 
-        doc_ref = self.db.collection(self.collection_name).document(doc_id)
+        query = (
+            self.db.collection(self.collection_name)
+            .where(filter=FieldFilter("device_id", "==", device_id))
+            .order_by(
+                "timestamp",
+                direction=firestore.Query.DESCENDING,
+            )
+        )
+
+        return [document.to_dict() for document in query.stream()]
+
+    def update_document(self, doc_id, data):
+        """Valida el documento completo antes de actualizarlo."""
+        doc_ref = (
+            self.db.collection(self.collection_name)
+            .document(doc_id)
+        )
+
+        current_doc = doc_ref.get()
+        if not current_doc.exists:
+            raise ValueError(f"El documento '{doc_id}' no existe.")
+
+        current_data = current_doc.to_dict() or {}
+        updated_data = {**current_data, **data}
+
+        valid, errors = validate_telemetry(updated_data)
+        if not valid:
+            raise ValueError(
+                "No se puede actualizar la lectura: " + "; ".join(errors)
+            )
+
         doc_ref.update(data)
         return True
 
     def delete_document(self, doc_id):
-        """Elimina el registro de Firestore."""
-        doc_ref = self.db.collection(self.collection_name).document(doc_id)
+        """Elimina un documento de la colecci?n."""
+        doc_ref = (
+            self.db.collection(self.collection_name)
+            .document(doc_id)
+        )
         doc_ref.delete()
         return True
