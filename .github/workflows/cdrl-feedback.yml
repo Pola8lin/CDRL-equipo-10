@@ -58,10 +58,12 @@ jobs:
           echo "$FIREBASE_SECRET" > ${GITHUB_WORKSPACE}/firebase-credenciales.json
 
       - name: Verify reproducibility contract
+        env:
+          FIREBASE_CREDENTIALS_PATH: ${{ github.workspace }}/firebase-credenciales.json
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/firebase-credenciales.json
         shell: bash
         run: |
           set -euo pipefail
           cp .env.example .env
-          echo "FIREBASE_CREDENTIALS_PATH=${GITHUB_WORKSPACE}/firebase-credenciales.json" >> .env
           make setup
           make verify
