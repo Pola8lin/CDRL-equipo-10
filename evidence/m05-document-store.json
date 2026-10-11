@@ -1,0 +1,15 @@
+{
+    "assignmentId": "m05-document-store",
+    "responsible": "Erick",
+    "testing": {
+        "automated_tests_created": true,
+        "normal_cases": 2,
+        "edge_cases": 2,
+        "declared_failures": 1
+    },
+    "integration": {
+        "make_verify_passed": true,
+        "firestore_connected": true
+    },
+    "status": "ready_for_delivery"
+}

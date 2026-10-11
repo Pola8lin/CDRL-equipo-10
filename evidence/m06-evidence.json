@@ -1,0 +1,15 @@
+{
+    "assignmentId": "m06-recovery",
+    "responsible": "Erick",
+    "activities": {
+        "controlled_failure_simulated": true,
+        "fixture_recovered": true,
+        "recovery_time_measured": true,
+        "integration_passed": true
+    },
+    "recovery_metrics": {
+        "time_seconds": 0.5,
+        "data_integrity_verified": true
+    },
+    "status": "ready_for_delivery"
+}
