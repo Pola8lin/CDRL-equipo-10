@@ -51,19 +51,26 @@ jobs:
           docker compose logs postgres
           exit 1
 
-      - name: Crear archivo de credenciales de Firebase
-        env:
-          FIREBASE_SECRET: ${{ secrets.FIREBASE_CREDENTIALS_BASE64 }}
-        run: |
-          echo "$FIREBASE_SECRET" > ${GITHUB_WORKSPACE}/firebase-credenciales.json
-
       - name: Verify reproducibility contract
         env:
-          FIREBASE_CREDENTIALS_PATH: ${{ github.workspace }}/firebase-credenciales.json
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/firebase-credenciales.json
+          FIREBASE_SECRET: ${{ secrets.FIREBASE_CREDENTIALS_BASE64 }}
         shell: bash
         run: |
           set -euo pipefail
           cp .env.example .env
           make setup
+          # 1. Crea el archivo en una carpeta segura (/tmp) DESPUÉS de que el setup limpie todo
+          # Si el secreto empieza con "{", es texto normal. Si no, lo decodifica de Base64.
+          if [[ "${FIREBASE_SECRET}" == "{"* ]]; then
+            echo "$FIREBASE_SECRET" > /tmp/firebase-credenciales.json
+          else
+            echo "$FIREBASE_SECRET" | base64 --decode > /tmp/firebase-credenciales.json
+          fi
+          
+          # 2. Inyecta la ruta para el archivo DocumentStore
+          echo "FIREBASE_CREDENTIALS_PATH=/tmp/firebase-credenciales.json" >> .env
+          
+          # 3. Fuerza a Firebase globalmente para reparar las pruebas de Auditoría
+          export GOOGLE_APPLICATION_CREDENTIALS="/tmp/firebase-credenciales.json"
+          
           make verify
