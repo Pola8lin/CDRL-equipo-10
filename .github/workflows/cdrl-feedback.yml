@@ -55,13 +55,13 @@ jobs:
         env:
           FIREBASE_SECRET: ${{ secrets.FIREBASE_CREDENTIALS_BASE64 }}
         run: |
-          echo "$FIREBASE_SECRET" | base64 --decode > firebase-credenciales.json
+          echo "$FIREBASE_SECRET" > ${GITHUB_WORKSPACE}/firebase-credenciales.json
 
       - name: Verify reproducibility contract
         shell: bash
         run: |
           set -euo pipefail
           cp .env.example .env
-          echo "FIREBASE_CREDENTIALS_PATH=firebase-credenciales.json" >> .env
+          echo "FIREBASE_CREDENTIALS_PATH=${GITHUB_WORKSPACE}/firebase-credenciales.json" >> .env
           make setup
           make verify
