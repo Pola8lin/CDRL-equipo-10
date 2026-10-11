@@ -59,16 +59,30 @@ jobs:
           set -euo pipefail
           cp .env.example .env
           make setup
-          
-          # Crea el archivo seguro en /tmp DESPUES de que el setup limpie todo
-          if [[ "${FIREBASE_SECRET}" == "{"* ]]; then
-            echo "$FIREBASE_SECRET" > /tmp/firebase-credenciales.json
-          else
-            echo "$FIREBASE_SECRET" | base64 --decode > /tmp/firebase-credenciales.json
+          # Comprueba que el secreto est? configurado.
+          if [[ -z "${FIREBASE_SECRET}" ]]; then
+            echo "Falta configurar FIREBASE_CREDENTIALS_BASE64."
+            exit 1
           fi
-          
-          # Inyecta la ruta en .env y globalmente para evitar fallos de otros modulos
-          echo "FIREBASE_CREDENTIALS_PATH=/tmp/firebase-credenciales.json" >> .env
-          export GOOGLE_APPLICATION_CREDENTIALS="/tmp/firebase-credenciales.json"
-          
+
+          # Crea el archivo de credenciales despu?s de make setup.
+          CREDENTIALS_FILE="/tmp/firebase-credenciales.json"
+
+          if [[ "${FIREBASE_SECRET}" == "{"* ]]; then
+            printf '%s' "$FIREBASE_SECRET" > "$CREDENTIALS_FILE"
+          else
+            printf '%s' "$FIREBASE_SECRET" | base64 --decode > "$CREDENTIALS_FILE"
+          fi
+
+          chmod 600 "$CREDENTIALS_FILE"
+
+          # Comprueba que sea una cuenta de servicio v?lida.
+          if ! python -c 'import json,sys; d=json.load(open(sys.argv[1], encoding="utf-8")); assert all(d.get(k) for k in ("project_id", "client_email", "private_key"))' "$CREDENTIALS_FILE" 2>/dev/null; then
+            echo "Las credenciales de Firebase no son un JSON valido de cuenta de servicio."
+            exit 1
+          fi
+
+          # Expone la ruta a la aplicaci?n y a las pruebas.
+          echo "FIREBASE_CREDENTIALS_PATH=$CREDENTIALS_FILE" >> .env
+          export GOOGLE_APPLICATION_CREDENTIALS="$CREDENTIALS_FILE"
           make verify
