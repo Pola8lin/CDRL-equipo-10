@@ -9,6 +9,10 @@ artifacts/*.log
 evidence/*-local.json
 db/data/
 docker-data/
-.DS_Store
+firebase-credenciales.json
+.firebaserc
+firebase.json
+firestore.rules
 # Secretos y variables de entorno local
 .env
+

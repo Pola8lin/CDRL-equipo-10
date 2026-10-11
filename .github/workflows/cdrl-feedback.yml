@@ -52,9 +52,23 @@ jobs:
           exit 1
 
       - name: Verify reproducibility contract
+        env:
+          FIREBASE_SECRET: ${{ secrets.FIREBASE_CREDENTIALS_BASE64 }}
         shell: bash
         run: |
           set -euo pipefail
           cp .env.example .env
           make setup
+          
+          # Crea el archivo seguro en /tmp DESPUES de que el setup limpie todo
+          if [[ "${FIREBASE_SECRET}" == "{"* ]]; then
+            echo "$FIREBASE_SECRET" > /tmp/firebase-credenciales.json
+          else
+            echo "$FIREBASE_SECRET" | base64 --decode > /tmp/firebase-credenciales.json
+          fi
+          
+          # Inyecta la ruta en .env y globalmente para evitar fallos de otros modulos
+          echo "FIREBASE_CREDENTIALS_PATH=/tmp/firebase-credenciales.json" >> .env
+          export GOOGLE_APPLICATION_CREDENTIALS="/tmp/firebase-credenciales.json"
+          
           make verify
