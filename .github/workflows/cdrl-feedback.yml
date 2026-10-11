@@ -59,18 +59,16 @@ jobs:
           set -euo pipefail
           cp .env.example .env
           make setup
-          # 1. Crea el archivo en una carpeta segura (/tmp) DESPUÉS de que el setup limpie todo
-          # Si el secreto empieza con "{", es texto normal. Si no, lo decodifica de Base64.
+          
+          # Crea el archivo seguro en /tmp DESPUES de que el setup limpie todo
           if [[ "${FIREBASE_SECRET}" == "{"* ]]; then
             echo "$FIREBASE_SECRET" > /tmp/firebase-credenciales.json
           else
             echo "$FIREBASE_SECRET" | base64 --decode > /tmp/firebase-credenciales.json
           fi
           
-          # 2. Inyecta la ruta para el archivo DocumentStore
+          # Inyecta la ruta en .env y globalmente para evitar fallos de otros modulos
           echo "FIREBASE_CREDENTIALS_PATH=/tmp/firebase-credenciales.json" >> .env
-          
-          # 3. Fuerza a Firebase globalmente para reparar las pruebas de Auditoría
           export GOOGLE_APPLICATION_CREDENTIALS="/tmp/firebase-credenciales.json"
           
           make verify
