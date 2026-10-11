@@ -3,6 +3,9 @@ from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, firestore
 
+# 1. IMPORTAMOS TU VALIDADOR
+from src.validator import validate_telemetry
+
 # Cargar variables de entorno desde el archivo .env
 load_dotenv()
 
@@ -30,6 +33,11 @@ class DocumentStore:
         Crea un nuevo documento. 
         Si el doc_id ya existe, lo sobrescribe (comportamiento Upsert).
         """
+        # 2. CONECTAMOS LA VALIDACIÓN A LA ESCRITURA
+        es_valido, errores = validate_telemetry(data)
+        if not es_valido:
+            raise ValueError(f"No se puede guardar. Datos inválidos: {', '.join(errores)}")
+
         doc_ref = self.db.collection(self.collection_name).document(doc_id)
         doc_ref.set(data)
         return doc_id
@@ -44,6 +52,11 @@ class DocumentStore:
 
     def update_document(self, doc_id, data):
         """Actualiza campos específicos de un documento que ya existe."""
+        # También validamos antes de actualizar
+        es_valido, errores = validate_telemetry(data)
+        if not es_valido:
+            raise ValueError(f"No se puede actualizar. Datos inválidos: {', '.join(errores)}")
+
         doc_ref = self.db.collection(self.collection_name).document(doc_id)
         # update() falla si el documento no existe, lo cual es correcto para esta operación
         doc_ref.update(data)
