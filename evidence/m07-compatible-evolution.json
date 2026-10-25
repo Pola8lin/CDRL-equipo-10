@@ -1,0 +1,33 @@
+
+{
+  "assignmentId": "m07-compatible-evolution",
+  "responsible": "Ana Paola Palacios Lindo",
+  "implementation": {
+    "legacy_v1_readable": true,
+    "migration_to_v2": true,
+    "migration_idempotent": true,
+    "rollback_to_v1": true,
+    "input_preserved": true
+  },
+  "tests": {
+    "normal_case": "test_valid_legacy_document_migrates_to_v2",
+    "boundary_and_invalid_cases": [
+      "test_invalid_temperature_is_rejected",
+      "test_missing_required_field_is_rejected"
+    ],
+    "declared_failure": "test_unsupported_schema_version_is_rejected",
+    "compatibility": "test_v1_and_v2_are_read_compatibly",
+    "idempotence": "test_migration_is_idempotent",
+    "rollback": "test_rollback_restores_legacy_structure"
+  },
+  "verification": {
+    "command": "make verify",
+    "tests_passed": 51,
+    "tests_failed": 0,
+    "tests_skipped": 1,
+    "duration_seconds": 1.17,
+    "status": "passed_with_skip"
+  },
+  "limitation": "La integración real con Firestore se omitió porque no hay un servicio local disponible.",
+  "evidence": "artifacts/pytest-results.xml"
+}

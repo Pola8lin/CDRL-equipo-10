@@ -1,0 +1,23 @@
+{
+  "assignmentId": "m07-compatible-evolution",
+  "command": "make verify",
+  "result": {
+    "passed": 51,
+    "failed": 0,
+    "skipped": 1,
+    "duration_seconds": 1.17
+  },
+  "checks": {
+    "compatible_read": "passed",
+    "idempotent_migration": "passed",
+    "rollback": "passed",
+    "invalid_document_rejection": "passed",
+    "unsupported_version_rejection": "passed"
+  },
+  "external_integration": {
+    "service": "Firestore",
+    "status": "skipped",
+    "reason": "No hay un servicio local disponible."
+  },
+  "status": "passed_with_skip"
+}
