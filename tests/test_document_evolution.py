@@ -8,7 +8,11 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from src.document_evolution import migrate_to_v2
+from src.document_evolution import (
+    migrate_to_v2,
+    read_telemetry_compatible,
+    rollback_to_v1,
+)
 from src.validator import ALLOWED_UNIT
 
 
@@ -53,3 +57,49 @@ def test_missing_required_field_is_rejected():
 
     with pytest.raises(ValueError, match="Invalid legacy document"):
         migrate_to_v2(document)
+
+
+from src.document_evolution import (
+    migrate_to_v2,
+    read_telemetry_compatible,
+    rollback_to_v1,
+)
+
+
+def test_migration_is_idempotent():
+    legacy = load_v1_documents()[0]
+    first = migrate_to_v2(legacy)
+    second = migrate_to_v2(first)
+
+    assert second == first
+    assert legacy.get("schema_version", 1) == 1
+
+
+def test_v1_and_v2_are_read_compatibly():
+    legacy = load_v1_documents()[0]
+    migrated = migrate_to_v2(legacy)
+
+    assert read_telemetry_compatible(legacy) == migrated["reading"]
+    assert read_telemetry_compatible(migrated) == migrated["reading"]
+
+
+def test_rollback_restores_legacy_structure():
+    legacy = load_v1_documents()[0]
+    migrated = migrate_to_v2(legacy)
+    restored = rollback_to_v1(migrated)
+
+    expected = {
+        key: value
+        for key, value in legacy.items()
+        if key != "_description"
+    }
+    assert restored == expected
+    assert "schema_version" not in restored
+    assert "reading" not in restored
+
+
+def test_rollback_rejects_legacy_document():
+    legacy = load_v1_documents()[0]
+
+    with pytest.raises(ValueError, match="Rollback requires a v2 document"):
+        rollback_to_v1(legacy)

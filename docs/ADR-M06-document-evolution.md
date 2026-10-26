@@ -75,3 +75,44 @@ La estrategia conserva el contrato de validación de M05 y deja preparada una ba
 ## 7. Conclusión
 
 La implementación demuestra cómo evolucionar la estructura de los documentos de telemetría mediante versiones explícitas, validación reutilizada y pruebas automatizadas. De esta manera, se reducen los riesgos de aceptar datos inválidos o convertir documentos de una versión desconocida.
+
+
+## Evolución compatible de documentos: v1 a v2
+
+### Contexto
+
+Los consumidores existentes utilizan documentos de telemetría en formato v1, con campos como `device_id`, `timestamp`, `metric`, `value` y `unit` en el nivel raíz. La versión v2 agrupa esos campos dentro de `reading` e incorpora `schema_version: 2`.
+
+El objetivo es permitir la transición entre formatos sin impedir la lectura de documentos anteriores.
+
+### Decisión
+
+Se implementan tres operaciones:
+
+- `read_telemetry_compatible(document)`: reconoce documentos v1 y v2, valida su estructura y devuelve los datos de telemetría en una representación común.
+- `migrate_to_v2(document)`: convierte documentos v1 a v2 y acepta documentos v2 válidos. Repetir la migración sobre un documento ya migrado produce el mismo resultado normalizado.
+- `rollback_to_v1(document)`: reconstruye la estructura de datos v1 a partir de un documento v2 válido.
+
+Las operaciones trabajan sobre copias de los datos y no deben modificar el documento de entrada.
+
+### Compatibilidad
+
+Durante la transición, la lectura compatible admite ambas versiones. Los consumidores que necesiten los campos en el nivel raíz pueden utilizar la representación v1 reconstruida; los consumidores nuevos pueden utilizar el formato v2.
+
+Los documentos con versiones desconocidas o datos que no cumplen la validación se rechazan explícitamente.
+
+### Rollback y límites
+
+El rollback reconstruye los campos de telemetría de v1, pero no constituye una reversión transaccional del almacén persistente. No restaura metadatos que se hayan descartado durante la migración ni revierte automáticamente escrituras en Firestore u otra base de datos.
+
+La implementación actual proporciona conversión y lectura compatibles a nivel de documento. No ejecuta por sí sola una migración masiva ni modifica automáticamente los documentos almacenados.
+
+### Verificación
+
+Las pruebas automatizadas comprueban la migración de documentos válidos, el rechazo de datos inválidos y versiones desconocidas, la lectura compatible entre v1 y v2, la idempotencia de la migración y el rollback.
+
+La última ejecución de `make verify` registró 51 pruebas aprobadas y 1 omitida. La prueba omitida corresponde a la integración real con Firestore, que requiere un servicio local disponible. Por ello, este resultado no demuestra por sí solo una migración persistente en Firestore.
+
+### Consecuencias
+
+La estrategia permite una transición gradual y facilita la compatibilidad entre consumidores antiguos y nuevos. Como contrapartida, los consumidores deben conocer el formato de los datos que reciben y la reversión persistente requiere un procedimiento adicional, respaldos y pruebas específicas.
