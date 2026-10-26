@@ -13,6 +13,7 @@ from src.validator import validate_telemetry
 
 
 def make_reading(value):
+    
     """Genera un diccionario de telemetría base para usar en las pruebas."""
     return {
         "device_id": "sensor-m05-test",

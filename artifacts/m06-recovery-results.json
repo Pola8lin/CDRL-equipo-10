@@ -5,7 +5,7 @@
   "controlled_failure_detected": true,
   "fixture_recovered": true,
   "data_integrity_verified": true,
-  "recovery_time_seconds": 2.1e-06,
+  "recovery_time_seconds": 3.7e-06,
   "recovered_fields": 5,
   "status": "passed"
 }
