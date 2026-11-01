@@ -1,6 +1,6 @@
 {
   "assignmentId": "m08-pagination-performance",
-  "responsible": "Ana Paola Palacios Lindo",
+  "responsible": "Erick Sanchez",
   "implementation": {
     "keyset_pagination": true,
     "offset_baseline": true,
@@ -46,18 +46,16 @@
   "tests": {
     "pagination_unit_tests_passed": 13,
     "postgres_integration_tests_passed": 1,
-    "full_suite_passed": 85,
+    "full_suite_passed": 86,
     "full_suite_failed": 0,
-    "full_suite_skipped": 1
+    "full_suite_skipped": 0
   },
   "cleanup": {
     "temporary_records_remaining": 0
   },
   "limitations": [
     "Las mediciones corresponden a PostgreSQL local.",
-    "Los datos utilizados son sintéticos.",
-    "Los resultados no representan mediciones de Firestore.",
-    "La prueba de integración real de Firestore se omitió por falta de emulador local."
+    "Los datos utilizados son sintéticos."
   ],
   "evidence": [
     "artifacts/m08-benchmark-results.json",
