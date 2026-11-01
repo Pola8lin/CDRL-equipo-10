@@ -13,6 +13,7 @@ from src.database import get_connection
 MIGRATION_FILE = ROOT / "db" / "migrations" / "01_create_table.sql"
 SECURITY_MIGRATION_FILE = ROOT / "db" / "migrations" / "03_security_roles.sql"
 SEED_FILE = ROOT / "db" / "seed" / "02_insert_data.sql"
+M08_MIGRATION_FILE = ROOT / "db" / "migrations" / "04_m08_pagination_index.sql"
 
 
 def execute_sql_file(connection, path):
@@ -25,6 +26,7 @@ def execute_sql_file(connection, path):
 
 
 
+
 def main():
     print("Aplicando migración...")
     with get_connection() as connection:
@@ -33,6 +35,10 @@ def main():
     print("Aplicando migración de seguridad...")
     with get_connection() as connection:
         execute_sql_file(connection, SECURITY_MIGRATION_FILE)
+
+    print("Aplicando índice de paginación M08...")
+    with get_connection() as connection:
+        execute_sql_file(connection, M08_MIGRATION_FILE)
 
     print("Aplicando seed...")
     with get_connection() as connection:

@@ -4,8 +4,14 @@ from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, firestore
 from google.cloud.firestore_v1.base_query import FieldFilter
+from google.cloud.firestore_v1.field_path import FieldPath
 
 from src.validator import validate_telemetry
+from src.document_pagination import (
+    encode_cursor,
+    decode_cursor,
+    validate_page_size,
+)
 
 # Carga las variables de entorno del proyecto.
 load_dotenv()
@@ -70,6 +76,72 @@ class DocumentStore:
         )
 
         return [document.to_dict() for document in query.stream()]
+
+
+    def get_documents_by_device_page(
+        self,
+        device_id,
+        page_size=20,
+        cursor=None,
+    ):
+        """Obtiene una página estable de lecturas de un dispositivo."""
+
+        if not isinstance(device_id, str) or not device_id.strip():
+            raise ValueError("device_id debe ser una cadena no vacía.")
+
+        validate_page_size(page_size)
+
+        collection = self.db.collection(self.collection_name)
+
+        query = (
+            collection
+            .where(filter=FieldFilter("device_id", "==", device_id))
+            .order_by(
+                "timestamp",
+                direction=firestore.Query.DESCENDING,
+            )
+            .order_by(
+                FieldPath.document_id(),
+                direction=firestore.Query.DESCENDING,
+            )
+        )
+
+        if cursor is not None:
+            last_document_id = decode_cursor(cursor, device_id)
+            last_document = collection.document(last_document_id).get()
+
+            if not last_document.exists:
+                raise ValueError("El documento del cursor ya no existe.")
+
+            last_data = last_document.to_dict() or {}
+
+            if last_data.get("device_id") != device_id:
+                raise ValueError("El cursor no corresponde al dispositivo.")
+
+            query = query.start_after(last_document)
+
+        documents = list(query.limit(page_size + 1).stream())
+
+        has_more = len(documents) > page_size
+        page_documents = documents[:page_size]
+
+        results = [document.to_dict() for document in page_documents]
+
+        next_cursor = None
+
+        if has_more and page_documents:
+            next_cursor = encode_cursor(
+                device_id,
+                page_documents[-1].id,
+            )
+
+        return {
+            "items": results,
+            "next_cursor": next_cursor,
+            "has_more": has_more,
+        }
+
+
 
     def update_document(self, doc_id, data):
         """Valida el documento completo antes de actualizarlo."""
