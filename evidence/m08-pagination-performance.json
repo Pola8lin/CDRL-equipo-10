@@ -1,0 +1,65 @@
+{
+  "assignmentId": "m08-pagination-performance",
+  "responsible": "Erick Sanchez",
+  "implementation": {
+    "keyset_pagination": true,
+    "offset_baseline": true,
+    "composite_index_created": true,
+    "cursor_validation": true,
+    "stable_ordering": true,
+    "duplicate_records_prevented": true,
+    "synthetic_data_cleanup": true
+  },
+  "index": {
+    "name": "idx_telemetry_device_timestamp_id",
+    "table": "telemetry_reading",
+    "columns": [
+      "device_id ASC",
+      "timestamp DESC",
+      "id DESC"
+    ],
+    "verified_in_postgresql": true
+  },
+  "benchmark": {
+    "database": "PostgreSQL 16.15",
+    "synthetic_records": 10000,
+    "page_size": 50,
+    "page_offset": 9000,
+    "warmup_runs_per_strategy": 10,
+    "samples_per_strategy": 100,
+    "results_equal": true,
+    "offset": {
+      "p50_ms": 1.2636,
+      "p95_ms": 1.6806,
+      "min_ms": 1.1387,
+      "max_ms": 2.3247
+    },
+    "keyset": {
+      "p50_ms": 0.4805,
+      "p95_ms": 0.8246,
+      "min_ms": 0.394,
+      "max_ms": 1.4894
+    },
+    "p50_improvement_percent": 61.98,
+    "p95_improvement_percent": 50.94
+  },
+  "tests": {
+    "pagination_unit_tests_passed": 13,
+    "postgres_integration_tests_passed": 1,
+    "full_suite_passed": 86,
+    "full_suite_failed": 0,
+    "full_suite_skipped": 0
+  },
+  "cleanup": {
+    "temporary_records_remaining": 0
+  },
+  "limitations": [
+    "Las mediciones corresponden a PostgreSQL local.",
+    "Los datos utilizados son sintéticos."
+  ],
+  "evidence": [
+    "artifacts/m08-benchmark-results.json",
+    "artifacts/pytest-results.xml"
+  ],
+  "status": "benchmark_completed"
+}
