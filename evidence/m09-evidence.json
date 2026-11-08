@@ -1,0 +1,26 @@
+{
+    "assignmentId": "m09-security-audit",
+    "responsible": "Erick Sanchez",
+    "implementation": {
+        "collection_operation_controls": true,
+        "audit_logging_active": true,
+        "secrets_sanitized": true,
+        "remediation_documented": true
+    },
+    "tests": {
+        "normal_case": "test_writer_can_insert",
+        "boundary_cases": [
+            "test_reader_can_select",
+            "test_operator_can_read_summary_view"
+        ],
+        "declared_failure_and_abuse": "test_reader_cannot_insert"
+    },
+    "verification": {
+        "status": "passed",
+        "command": "make verify"
+    },
+    "evidence": [
+        "artifacts/pytest-results.xml",
+        "docs/m09-reporte.md"
+    ]
+}
