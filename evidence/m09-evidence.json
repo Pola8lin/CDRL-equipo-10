@@ -1,26 +1,44 @@
 {
-    "assignmentId": "m09-security-audit",
-    "responsible": "Erick Sanchez",
-    "implementation": {
-        "collection_operation_controls": true,
-        "audit_logging_active": true,
-        "secrets_sanitized": true,
-        "remediation_documented": true
-    },
-    "tests": {
-        "normal_case": "test_writer_can_insert",
-        "boundary_cases": [
-            "test_reader_can_select",
-            "test_operator_can_read_summary_view"
-        ],
-        "declared_failure_and_abuse": "test_reader_cannot_insert"
-    },
-    "verification": {
-        "status": "passed",
-        "command": "make verify"
-    },
-    "evidence": [
-        "artifacts/pytest-results.xml",
-        "docs/m09-reporte.md"
+  "assignmentId": "m09-security-audit",
+  "responsible": "Equipo 10; completar autores tecnicos individuales con el historial Git",
+  "implementation": {
+    "collection_operation_controls": "implemented_pending_execution",
+    "audit_metadata_actor_action_resource_result": "implemented_pending_execution",
+    "audit_excludes_payloads_and_secrets": "implemented_pending_execution",
+    "remediation_migration": "implemented_pending_execution"
+  },
+  "tests": {
+    "normal_case": [
+      "test_writer_can_insert",
+      "test_reader_can_select",
+      "test_operator_can_read_summary_view"
+    ],
+    "boundary_cases": [
+      "test_writer_cannot_select",
+      "test_writer_cannot_update",
+      "test_reader_cannot_delete",
+      "test_operator_cannot_read_telemetry_table"
+    ],
+    "declared_failure_and_abuse": [
+      "test_reader_cannot_insert",
+      "test_run_audited_registra_denegacion_sin_detalles_de_excepcion"
+    ],
+    "audit_unit_tests": [
+      "test_registro_incluye_actor_accion_recurso_y_resultado",
+      "test_evento_auditoria_se_emite_como_json",
+      "test_auditoria_no_incluye_cargas_utiles_ni_secretos",
+      "test_resultado_invalido_se_rechaza"
     ]
+  },
+  "verification": {
+    "status": "pending_local_execution",
+    "required_commands": ["make setup", "make verify", "make run"],
+    "verified_sha": null
+  },
+  "evidence": [
+    "artifacts/m09-security-results.json",
+    "artifacts/pytest-results.xml",
+    "docs/m09-reporte.md",
+    "db/migrations/05_m09_security_hardening.sql"
+  ]
 }
