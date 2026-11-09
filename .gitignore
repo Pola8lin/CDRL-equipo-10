@@ -3,9 +3,12 @@
 node_modules/
 __pycache__/
 .pytest_cache/
-artifacts/*.json
-artifacts/*.xml
-artifacts/*.log
+artifacts/*
+!artifacts/.gitkeep
+!artifacts/m09-security-results.json
+!artifacts/pytest-results.xml
+!artifacts/m09-remediation-results.json
+*.log
 evidence/*-local.json
 db/data/
 docker-data/
@@ -13,6 +16,3 @@ firebase-credenciales.json
 .firebaserc
 firebase.json
 firestore.rules
-# Secretos y variables de entorno local
-.env
-

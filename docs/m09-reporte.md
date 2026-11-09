@@ -1,29 +1,49 @@
-# M09 – Controles de Acceso y Auditoría Útil
+# M09 – Controles de acceso y auditoría útil
 
-## 1. Objetivo
-Diseñar controles por colección y operación, probar escenarios de abuso y demostrar una auditoría útil que no registre secretos ni datos sensibles.
+## Objetivo
+Aplicar permisos por colección y operación, probar intentos de abuso y emitir eventos de auditoría útiles sin guardar secretos.
 
-## 2. Controles por Colección y Operación (RBAC)
-Se implementó un modelo de control de acceso basado en roles directamente en el motor de base de datos (PostgreSQL), limitando las operaciones por tabla y tipo de acción:
-- **Rol Writer:** Tiene permisos para ejecutar `INSERT` en la tabla de telemetría, pero no puede ejecutar `DELETE` ni `UPDATE`.
-- **Rol Reader:** Tiene permisos exclusivos de lectura (`SELECT`), impidiendo cualquier mutación de datos.
-- **Rol Operator:** Solo tiene acceso a la vista de resumen (`summary_view`), restringiendo por completo el acceso a la tabla principal de telemetría.
+## Modelo de permisos
+La migración histórica `03_security_roles.sql` conserva el contexto M03. La corrección específica M09 se aplica mediante `05_m09_security_hardening.sql`, sin reescribir la migración histórica.
 
-## 3. Auditoría sin Secretos
-Se configuró un registro de auditoría estructurado que captura los eventos del sistema de forma segura. 
-Cada registro de auditoría incluye:
-- **Actor:** El rol o usuario que ejecuta la operación.
-- **Acción:** El tipo de operación intentada.
-- **Recurso:** La tabla o vista afectada.
-- **Resultado:** Éxito o denegación de la transacción.
+| Rol | Recurso | Permisos |
+|---|---|---|
+| `cdrl_reader` | `public.telemetry_reading` | SELECT |
+| `cdrl_writer` | `public.telemetry_reading` | INSERT y uso de secuencia |
+| `cdrl_operator` | `public.telemetry_summary` | SELECT |
+| `cdrl_migrator` | tabla y secuencia | administración |
 
-Para garantizar la seguridad, el sistema sanitiza automáticamente las cargas útiles antes de escribirlas en el log, omitiendo contraseñas, tokens o cadenas de conexión.
+Los permisos se aplican en PostgreSQL. Writer no debe poder leer, actualizar ni borrar la tabla. Operator no debe poder consultar la tabla base.
 
-## 4. Pruebas y Remediación
-La suite automatizada valida escenarios de abuso:
-- **Caso normal:** El rol `writer` inserta telemetría correctamente.
-- **Casos límite:** El `reader` consulta datos exitosamente; el `operator` accede al resumen sin ver la tabla base.
-- **Fallo declarado y Remediación:** Cuando el rol `reader` intenta un `INSERT` (abuso de privilegios), la base de datos aborta la transacción mediante una política estricta y el sistema registra el rechazo en la auditoría. La remediación técnica consistió en revocar el esquema público por defecto y asignar permisos explícitos (Principio de Menor Privilegio).
+## Auditoría
+`src/audit.py` emite JSON estructurado con `actor`, `action`, `resource`, `result`, identificador y timestamp. Los resultados válidos son `success`, `denied` y `error`.
 
-## 5. Evidencia
-Los resultados de estas reglas se demuestran en las pruebas `tests/test_permissions.py` y `tests/test_audit.py`. El reporte automatizado se guarda en `artifacts/pytest-results.xml`.
+El envoltorio `run_audited` registra éxito o excepción. Solo clasifica como `denied` una excepción PostgreSQL con SQLSTATE `42501`; otras excepciones se clasifican como `error`. La excepción original se vuelve a lanzar.
+
+Por diseño, el evento no incluye SQL, parámetros, payload, mensajes de excepción ni credenciales. Así se evita depender de una lista parcial de nombres de campos secretos.
+
+## Casos de prueba
+- Normal: Writer inserta una lectura sintética; Reader consulta; Operator consulta la vista.
+- Límites: Writer no puede leer ni actualizar; Reader no puede borrar; Operator no puede leer la tabla base.
+- Abuso/fallo declarado: Reader intenta INSERT y PostgreSQL debe devolver privilegio insuficiente (SQLSTATE 42501); el envoltorio emite resultado `denied`.
+
+Las pruebas de permisos requieren PostgreSQL local y las contraseñas sintéticas configuradas en `.env` a partir de `.env.example`.
+
+## Remediación
+La condición vulnerable era que la política anterior otorgaba a Writer `SELECT, INSERT, UPDATE`, además de repetir el GRANT. La migración M09 revoca los privilegios de los roles de aplicación y concede únicamente los permisos definidos en la matriz anterior. Es idempotente y se ejecuta desde `scripts/db_setup.py`.
+
+La prueba `test_writer_cannot_update` verifica la denegación posterior a la remediación. También se prueban los límites de lectura y borrado.
+
+## Ejecución y evidencia
+Ejecutar en el entorno del equipo:
+
+```bash
+make setup
+make verify
+make run
+```
+
+El resultado verificable debe guardarse en `artifacts/m09-security-results.json` y la salida JUnit en `artifacts/pytest-results.xml`. No declarar aprobado hasta ejecutar estos comandos y conservar los resultados reales.
+
+## Limitaciones
+La auditoría implementada emite eventos al logger Python; su persistencia y envío a un colector central dependen de la configuración de logging del despliegue. Las pruebas unitarias validan el formato y la ausencia de cargas útiles; las pruebas PostgreSQL validan permisos y el registro del resultado en el logger durante la ejecución de la operación.

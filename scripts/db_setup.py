@@ -12,38 +12,30 @@ from src.database import get_connection
 
 MIGRATION_FILE = ROOT / "db" / "migrations" / "01_create_table.sql"
 SECURITY_MIGRATION_FILE = ROOT / "db" / "migrations" / "03_security_roles.sql"
-SEED_FILE = ROOT / "db" / "seed" / "02_insert_data.sql"
 M08_MIGRATION_FILE = ROOT / "db" / "migrations" / "04_m08_pagination_index.sql"
+M09_SECURITY_MIGRATION_FILE = ROOT / "db" / "migrations" / "05_m09_security_hardening.sql"
+SEED_FILE = ROOT / "db" / "seed" / "02_insert_data.sql"
 
 
 def execute_sql_file(connection, path):
     sql = path.read_text(encoding="utf-8")
-
     with connection.cursor() as cursor:
         cursor.execute(sql)
-
     connection.commit()
 
 
-
-
 def main():
-    print("Aplicando migración...")
-    with get_connection() as connection:
-        execute_sql_file(connection, MIGRATION_FILE)
-
-    print("Aplicando migración de seguridad...")
-    with get_connection() as connection:
-        execute_sql_file(connection, SECURITY_MIGRATION_FILE)
-
-    print("Aplicando índice de paginación M08...")
-    with get_connection() as connection:
-        execute_sql_file(connection, M08_MIGRATION_FILE)
-
-    print("Aplicando seed...")
-    with get_connection() as connection:
-        execute_sql_file(connection, SEED_FILE)
-
+    migrations = (
+        ("migracion inicial", MIGRATION_FILE),
+        ("roles base", SECURITY_MIGRATION_FILE),
+        ("indice de paginacion M08", M08_MIGRATION_FILE),
+        ("endurecimiento de permisos M09", M09_SECURITY_MIGRATION_FILE),
+        ("datos sinteticos", SEED_FILE),
+    )
+    for label, path in migrations:
+        print(f"Aplicando {label}...")
+        with get_connection() as connection:
+            execute_sql_file(connection, path)
     print("Base de datos preparada correctamente.")
 
 
