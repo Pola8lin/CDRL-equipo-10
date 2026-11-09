@@ -1,6 +1,7 @@
 -- M09: endurecimiento idempotente de permisos por operacion.
 -- Se conserva la migracion historica M03 y se aplica esta correccion despues.
 
+REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 REVOKE ALL ON TABLE public.telemetry_reading FROM PUBLIC;
 REVOKE ALL ON TABLE public.telemetry_summary FROM PUBLIC;
 
