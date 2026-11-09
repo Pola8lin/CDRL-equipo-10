@@ -145,12 +145,21 @@ def test_operator_cannot_read_telemetry_table():
     )
 
 
+def _fetch_summary(conn):
+    with conn.cursor() as cur:
+        cur.execute("SELECT metric, total_readings FROM public.telemetry_summary")
+        return cur.fetchall()
+
+
 def test_operator_can_read_summary_view():
     conn = connect_as("operator")
     try:
-        with conn.cursor() as cur:
-            cur.execute("SELECT metric, total_readings FROM public.telemetry_summary")
-            rows = cur.fetchall()
+        rows = AuditLogger().run_audited(
+            actor="operator",
+            action="select",
+            resource="public.telemetry_summary",
+            operation=lambda: _fetch_summary(conn),
+        )
         assert all(metric == "temperature" for metric, _ in rows)
     finally:
         conn.close()
