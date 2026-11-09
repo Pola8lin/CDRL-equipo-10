@@ -1,0 +1,18 @@
+{
+  "assignment_id": "m09-security-audit",
+  "status": "pending_local_verification",
+  "verification": {
+    "commands_required": ["make setup", "make verify", "make run"],
+    "executed": false,
+    "pytest_passed": null,
+    "pytest_failed": null,
+    "pytest_skipped": null
+  },
+  "security_controls": {
+    "reader_select_only": "covered_by_test_reader_can_select_and_denials",
+    "writer_insert_only": "covered_by_test_writer_can_insert_and_denials",
+    "operator_summary_only": "covered_by_test_operator_can_read_summary_view",
+    "audit_result": "covered_by_audit_logger_tests"
+  },
+  "note": "No rellenar contadores ni marcar passed hasta ejecutar make verify en el entorno del equipo."
+}
