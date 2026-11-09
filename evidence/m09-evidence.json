@@ -1,11 +1,12 @@
+
 {
   "assignmentId": "m09-security-audit",
-  "responsible": "Equipo 10; completar autores tecnicos individuales con el historial Git",
+  "responsible": "Equipo 10",
   "implementation": {
-    "collection_operation_controls": "implemented_pending_execution",
-    "audit_metadata_actor_action_resource_result": "implemented_pending_execution",
-    "audit_excludes_payloads_and_secrets": "implemented_pending_execution",
-    "remediation_migration": "implemented_pending_execution"
+    "collection_operation_controls": "implemented_and_tested",
+    "audit_metadata_actor_action_resource_result": "implemented_and_tested",
+    "audit_excludes_payloads_and_secrets": "implemented_and_tested",
+    "remediation_migration": "applied_and_tested"
   },
   "tests": {
     "normal_case": [
@@ -16,6 +17,7 @@
     "boundary_cases": [
       "test_writer_cannot_select",
       "test_writer_cannot_update",
+      "test_writer_cannot_delete",
       "test_reader_cannot_delete",
       "test_operator_cannot_read_telemetry_table"
     ],
@@ -31,14 +33,32 @@
     ]
   },
   "verification": {
-    "status": "pending_local_execution",
-    "required_commands": ["make setup", "make verify", "make run"],
-    "verified_sha": null
+    "status": "passed_with_manual_shutdown",
+    "required_commands": [
+      "make setup",
+      "make verify",
+      "make run"
+    ],
+    "setup_completed": true,
+    "pytest_passed": 90,
+    "pytest_failed": 0,
+    "pytest_skipped": 1,
+    "pytest_total": 91,
+    "pytest_duration_seconds": 2.71,
+    "run_services_started": true,
+    "run_stopped_manually": true,
+    "run_exit_code": 130,
+    "verified_sha": "cff9867d146247d1c41912cf61443c4abed7a708"
   },
   "evidence": [
     "artifacts/m09-security-results.json",
     "artifacts/pytest-results.xml",
     "docs/m09-reporte.md",
+    "docs/ADR-M09-security-audit.md",
     "db/migrations/05_m09_security_hardening.sql"
+  ],
+  "limitations": [
+    "Firestore integration test skipped because no local Firestore instance was available.",
+    "Docker services were stopped manually after startup."
   ]
 }
